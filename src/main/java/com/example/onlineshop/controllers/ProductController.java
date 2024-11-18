@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 // Контроллер ProductController отвечает за отображение главной страницы магазина
 @Controller
@@ -15,11 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class ProductController {
     private final ProductService productService;
     @GetMapping("/") // переход в корень сайта
-
-    public String products(Model model) //для передачи параметров в шаблонизатор
+    // @RequestParam - если title нет, то вернем весь список, иначе вернем отсортированные товары по названию.
+    public String products(@RequestParam(name = "title", required = false) String title, Model model) // Для передачи параметров в шаблонизатор
     {
         //передаем список всех товаров
-        model.addAttribute("products", productService.listProducts());
+        model.addAttribute("products", productService.listProducts(title));
         return "products";
     }
     @GetMapping("/product/{id}")
