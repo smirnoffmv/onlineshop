@@ -50,14 +50,15 @@ public class ProductService { //сервис для работы с товара
 
         log.info("Сохранен новый товар, Название: {}; Автор: {}", product.getTitle(), product.getAuthor()); // выводим сообщение о том, что новый товар сохранен
         Product productFromDb = productRepository.save(product);
-        productFromDb.setPreviewImageId(productFromDb.getImages().get(0).getId())
+        productFromDb.setPreviewImageId(productFromDb.getImages().get(0).getId());
         productRepository.save(product);
     }
 
+    // toImageEntity - для преобразования MultipartFile (файл, полученный через HTTP-запрос) в объект Image
     private Image toImageEntity(MultipartFile file) throws IOException {
         Image image = new Image();
         image.setName(file.getName());
-        image.setOriginalFilename(file.getOriginalFilename());
+        image.setOriginalFileName(file.getOriginalFilename());
         image.setContentType(file.getContentType());
         image.setSize(file.getSize());
         image.setBytes(file.getBytes());
