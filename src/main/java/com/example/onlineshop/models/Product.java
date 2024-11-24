@@ -38,9 +38,9 @@ public class Product {
     private String author;
 
     // cascade - при действии с сущностью Product удаляем все фотографии;
-    // fetch - для того, чтобы загружать не все фото, а только её preview;
+    // fetch - для того, чтобы загружались изображения большого размера;
     // mappedBy - для создания связи по foreign key product
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "product")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "product")
     private List<Image> images = new ArrayList<>();
     private Long previewImageId;
     private LocalDateTime dateOfCreated;
@@ -48,5 +48,10 @@ public class Product {
     @PrePersist // для инициализации переменной dateOfCreated и перед сохранением записи в БД
     private void init() {
         dateOfCreated = LocalDateTime.now();
+    }
+
+    public void addImageToProduct(Image image) { // добавление изображений к соответствующему товару
+        image.setProduct(this);
+        images.add(image);
     }
 }
