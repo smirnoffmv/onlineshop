@@ -1,4 +1,9 @@
 package com.example.onlineshop.repositories;
 
-public class ImageRepository {
+import com.example.onlineshop.models.Image;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ImageRepository extends JpaRepository<Image, Long> {
+
+
 }
