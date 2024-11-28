@@ -34,8 +34,8 @@ public class Product {
     @Column(name= "city")
     private String city;
 
-    @Column(name= "author")
-    private String author;
+    //@Column(name= "author")
+    //private String author;
 
     // cascade - при действии с сущностью Product удаляем все фотографии;
     // fetch - для того, чтобы загружались изображения большого размера;
@@ -43,6 +43,9 @@ public class Product {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "product")
     private List<Image> images = new ArrayList<>();
     private Long previewImageId;
+    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    @JoinColumn
+    private User user;
     private LocalDateTime dateOfCreated;
 
     @PrePersist // для инициализации переменной dateOfCreated и перед сохранением записи в БД
