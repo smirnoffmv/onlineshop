@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class UserService {
     // Создание пользователя
     public boolean createUser (User user) {
         String email = user.getEmail();
+
         if (userRepository.findByEmail(user.getEmail()) != null) return false;
         user.setActive(true);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -62,5 +64,13 @@ public class UserService {
             }
         }
         userRepository.save(user);  // сохраняем пользователя с новыми ролями
+    }
+
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
+    }
+    public User getUserByPrincipal(Principal principal) {
+        if (principal == null) return new User();
+        return userRepository.findByEmail(principal.getName());
     }
 }
