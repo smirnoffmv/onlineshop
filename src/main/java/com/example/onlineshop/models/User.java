@@ -44,6 +44,7 @@ public class User implements UserDetails {
         dateOfCreated = LocalDateTime.now();
     }
 
+    public boolean isAdmin() {return roles.contains(Role.ROLE_ADMIN);}
     // Конфигурирование Spring Security
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
