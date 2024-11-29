@@ -2,13 +2,16 @@ package com.example.onlineshop.services;
 
 import com.example.onlineshop.models.Image;
 import com.example.onlineshop.models.Product;
+import com.example.onlineshop.models.User;
 import com.example.onlineshop.repositories.ProductRepository;
+import com.example.onlineshop.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService { //сервис для работы с товарами
     private final ProductRepository productRepository;
-
+    private  final UserRepository userRepository;
     //метод для получения листа товаров
     public List<Product> listProducts(String title) {
         if (title != null)
@@ -30,7 +33,8 @@ public class ProductService { //сервис для работы с товара
     }
 
     //в список добавляем товар, MultipartFile - для добавления формы загрузки изображений
-    public void saveProduct(Product product, MultipartFile file1, MultipartFile file2, MultipartFile file3) throws IOException {
+    public void saveProduct(Principal principal, Product product, MultipartFile file1, MultipartFile file2, MultipartFile file3) throws IOException {
+        product.setUser(getUserByPrinipal(principal));
         Image image1;
         Image image2;
         Image image3;
@@ -48,10 +52,19 @@ public class ProductService { //сервис для работы с товара
             product.addImageToProduct(image3);
         }
 
-        log.info("Сохранен новый товар, Название: {}; Автор: {}", product.getTitle(), product.getAuthor()); // выводим сообщение о том, что новый товар сохранен
+        log.info("Сохранен новый товар, Название: {}; Автор email: {}", product.getTitle(), product.getUser()); // выводим сообщение о том, что новый товар сохранен
         Product productFromDb = productRepository.save(product);
-        productFromDb.setPreviewImageId(productFromDb.getImages().get(0).getId());
+        //проверка на наличие изображений перед попыткой установить PreviewImageId
+        if (!productFromDb.getImages().isEmpty()) {
+            productFromDb.setPreviewImageId(productFromDb.getImages().get(0).getId());
+            productRepository.save(productFromDb);  // Сохраняем с обновленным previewImageId
+        }
         productRepository.save(product);
+    }
+
+    public User getUserByPrinipal(Principal principal) {
+        if (principal == null) return new User();
+        return userRepository.findByEmail(principal.getName());
     }
 
     // toImageEntity - для преобразования MultipartFile (файл, полученный через HTTP-запрос) в объект Image
