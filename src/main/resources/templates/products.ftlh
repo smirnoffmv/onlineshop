@@ -1,52 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ONLINESHOP</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<h1>ONLINESHOP</h1><hr>
-<#if user.email??>
-    <h3>Имя пользователя: <i>${user.name}</i></h3>
-    <form action="/logout" method="post">
-        <input type="hidden" name="_csrf" value="${_csrf.token}">
-        <input type="submit" value="Выйти из аккаунта">
-    </form>
-    <#if user.isAdmin()>
-        <a href=/admin>Панель администратора</a>
-    </#if>
-    <#else>
-     <a href="/login">Войти</a></h1>
-</#if>
+    <div class="container mt-4">
+    <h1 class="text-center">
+     <a href="/" class="text-dark text-decoration-none">ONLINESHOP</a>
+       </h1>
+        <hr>
+        <!-- Профиль пользователя -->
+        <#if user.email??>
+            <h3>Имя пользователя: <i>${user.name}</i></h3>
+            <form action="/logout" method="post">
+                <input type="hidden" name="_csrf" value="${_csrf.token}">
+                <button type="submit" class="btn btn-danger btn-sm">Выйти из аккаунта</button>
+            </form>
 
-<hr>
+            <!-- Панель администратора, если пользователь администратор -->
+            <#if user.isAdmin()>
+                <a href="/admin" class="btn btn-primary btn-sm mt-2">Панель администратора</a>
+            </#if>
+        <#else>
+            <a href="/login" class="btn btn-success btn-sm">Войти</a>
+        </#if>
 
-<h4>Товары со всей России</h4>
-<form action="/" method="get">
-    Поиск по названию объявления: <input type="text" name="title"><br>
-    <input type="submit" value="Поиск"/>
-</form>
-<#list products as product>
-<div>
-    <!-- кнопочка подробнее для перехода используем уникальное поле id -->
-    <p><b>${product.title}</b> ${product.price} руб. | <a href="/product/${product.id}">Подробнее</a></p>
-</div>
-<#else>
-<h3>Товаров нет</h3>
-</#list>
-<#if user.email??>
-<hr>
-<h3>Создать новый товар</h3>
-<form action="/product/create" method="post" enctype="multipart/form-data">
-    Название товара: <input type="text" name="title"/><br><br>
-    Описание товара: <input type="text" name="description"/><br><br>
-    Цена товара: <input type="number" name="price" min="0"/><br><br>
-    Город: <input type="text" name="city"/><br><br>
-    1 фотография: <input type="file" name="file1"/><br><br>
-    2 фотография: <input type="file" name="file2"/><br><br>
-    3 фотография: <input type="file" name="file3"/><br><br>
-    <input type="hidden" name="_csrf" value="${_csrf.token}">
-    <input type="submit" value="Добавить товар">
-</form>
-</#if>
+        <hr>
+
+        <!-- Форма поиска товаров -->
+        <h4>Товары со всей России</h4>
+        <form action="/" method="get" class="mb-4">
+            <div class="mb-3">
+                <label for="title" class="form-label">Поиск по названию объявления:</label>
+                <input type="text" name="title" class="form-control" id="title">
+            </div>
+            <button type="submit" class="btn btn-primary">Поиск</button>
+        </form>
+
+        <!-- Список товаров -->
+        <div class="list-group">
+           <#list products as product>
+               <div class="list-group-item">
+                   <div class="d-flex align-items-center justify-content-between">
+                       <p class="mb-0"><b>${product.title}</b> - ${product.price} руб.</p>
+                       <div class="d-flex align-items-center gap-2">
+                           <!-- Кнопка Подробнее -->
+                           <a href="/product/${product.id}" class="btn btn-info btn-sm">Подробнее</a>
+
+                           <!-- Удалить товар, если пользователь - владелец товара или администратор -->
+                           <#if user.email??>
+                               <#if user.isAdmin() || (user.id == product.user.id)>
+                                   <form action="/product/delete/${product.id}" method="post">
+                                       <input type="hidden" name="_csrf" value="${_csrf.token}">
+                                       <button type="submit" class="btn btn-danger btn-sm">Удалить товар</button>
+                                   </form>
+                               </#if>
+                           </#if>
+                       </div>
+                   </div>
+               </div>
+           <#else>
+               <p class="text-center">Товаров нет</p>
+           </#list>
+        </div>
+
+        <!-- Форма создания товара, если пользователь авторизован -->
+        <#if user.email??>
+            <hr>
+            <h3>Создать новый товар</h3>
+            <form action="/product/create" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Название товара:</label>
+                    <input type="text" name="title" class="form-control" id="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Описание товара:</label>
+                    <input type="text" name="description" class="form-control" id="description" required>
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Цена товара:</label>
+                    <input type="number" name="price" class="form-control" id="price" min="0" required>
+                </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">Город:</label>
+                    <input type="text" name="city" class="form-control" id="city" required>
+                </div>
+                <div class="mb-3">
+                    <label for="file1" class="form-label">1 фотография:</label>
+                    <input type="file" name="file1" class="form-control" id="file1">
+                </div>
+                <div class="mb-3">
+                    <label for="file2" class="form-label">2 фотография:</label>
+                    <input type="file" name="file2" class="form-control" id="file2">
+                </div>
+                <div class="mb-3">
+                    <label for="file3" class="form-label">3 фотография:</label>
+                    <input type="file" name="file3" class="form-control" id="file3">
+                </div>
+                <input type="hidden" name="_csrf" value="${_csrf.token}">
+                <button type="submit" class="btn btn-success">Добавить товар</button>
+            </form>
+        </#if>
+    </div>
 </body>
 </html>
